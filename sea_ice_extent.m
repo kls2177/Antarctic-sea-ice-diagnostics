@@ -1,23 +1,23 @@
 % SEA_ICE_EXTENT - calculates sea ice extent.
 
-%read in monthly files
-file1 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.0.allyrs.nc');
-file2 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.1.allyrs.nc');
-file3 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.2.allyrs.nc');
-file4 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.3.allyrs.nc');
-file5 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.4.allyrs.nc');
-file6 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.5.allyrs.nc');
-file7 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.6.allyrs.nc');
-file8 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.7.allyrs.nc');
-file9 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.8.allyrs.nc');
-file10 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.9.allyrs.nc');
-file11 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.10.allyrs.nc');
-file12 = strcat('/c/ksmith/WACCM_piCtrl/aice_nh_piControl.11.allyrs.nc');
+%monthly files of aice (sea ice concentration in percent) for the Southern Hemisphere (sh)
+file1 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.0.allyrs.nc');
+file2 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.1.allyrs.nc');
+file3 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.2.allyrs.nc');
+file4 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.3.allyrs.nc');
+file5 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.4.allyrs.nc');
+file6 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.5.allyrs.nc');
+file7 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.6.allyrs.nc');
+file8 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.7.allyrs.nc');
+file9 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.8.allyrs.nc');
+file10 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.9.allyrs.nc');
+file11 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.10.allyrs.nc');
+file12 = strcat('/c/ksmith/WACCM_piCtrl/aice_sh_piControl.11.allyrs.nc');
 
+%sea ice grid information
 file13 = ['/b/ksmith/CMIP5/CCSM4/CICE_grid.NH.nc'];
 
-
-%variables
+%read in sea ice variables
 f1  = netcdf.open(char(file1), 'NC_NOWRITE');
 ai_jan = squeeze(netcdf.getVar(f1,8,'float'));
 
@@ -60,7 +60,7 @@ tlon = netcdf.getVar(f12,5,'float');
 tarea = netcdf.getVar(f12,17,'float');
 tarea = squeeze(tarea(:,:,1));
 
-
+%initialize sea ice extent arrays
 ai_jan15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
 ai_feb15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
 ai_mar15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
@@ -74,7 +74,7 @@ ai_oct15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
 ai_nov15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
 ai_dec15 = zeros(size(ai_jan,1),size(ai_jan,2),size(ai_jan,3));
 
-%remove topography
+%remove topography and retain only grid cells with >= 15% sea ice concentration
  for i = 1:size(ai_jan15,1);
     for j = 1:size(ai_jan15,2);
         for k = 1:size(ai_jan15,3);
@@ -243,11 +243,14 @@ for i = 1:size(ai_dec15,1);
     end
 end
 
+%create seasonal means
 ai_djf15 = (ai_jan15(:,:,2:200) + ai_feb15(:,:,2:200) + ai_dec15(:,:,1:199))/3;
 ai_jja15 = (ai_jun15 + ai_aug15 + ai_jul15)/3;
 ai_mam15 = (ai_apr15 + ai_may15 + ai_mar15)/3;
 ai_son15 = (ai_oct15 + ai_nov15 + ai_sept15)/3;
 
+%compute sea ice extent (sea ice concentration multiplied by the 
+%area of each cell and then summed over all grid cells)
 fr = 0; fr_ki = 0;
 for j = 1:size(ai_djf15,3),
    for i = 1:size(ai_djf15,2)
@@ -300,6 +303,5 @@ for i = 1:size(ai_jan15,3)
     year(i) = i;
 end
 
-
-filename = strcat('WACCM_piControl_SH.mat')
+filename = strcat('WACCM_SIE_piControl_SH.mat')
 save(char(filename))
