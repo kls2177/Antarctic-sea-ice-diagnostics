@@ -3,7 +3,7 @@ clear all
 %load SIE pictrl data
 load CCSM4_piControl_pp_27yrs.mat
 
-lengthyear_ccsm = length(fr_ann_ccsm);
+lengthyear_ccsm = length(sie_ann_ccsm);
 for i = 1:lengthyear_ccsm, year_ccsm(i) = i;end
 
 %load CCSM4 ensemble members (repeat for other models)
@@ -21,18 +21,18 @@ for i = 1:12,
 end
 
 %load HadISST SIE data
-load HadISST_19792005_pp
+load HadISST_19792005
 
-%load NASA team SIE data
-load AA_SIE_obs
+%load NASA Team SIE data
+load NASA_19792005
 
 %load Bootstrap SIE data
-load Bootstrap
+load Bootstrap_19792005
 
-for i = 1:size(AA_SIE,1),year_obs(i) = i; end
+for i = 1:size(NASA,1),year_obs(i) = i; end
 
 for i = 1:12,
-    AA_SIE_MEAN(i) = mean(AA_SIE(1:27,i));
+    NASA_MEAN(i) = mean(NASA(1:27,i));
     Bootstrap_mean(i) = mean(Bootstrap(:,i));
 end
 
@@ -43,7 +43,7 @@ plot(month, sie_month_ccsm, 'b-','LineWidth',2);
 hold on
 plot(month,Bootstrap_mean/10^6,'k--','LineWidth',2)
 hold on
-plot(month,AA_SIE_MEAN,'k-','LineWidth',2)
+plot(month,NASA_MEAN,'k-','LineWidth',2)
 hold on
 plot(month,HadISST/10^12,'k-.','LineWidth',2)
 hold on
@@ -61,7 +61,7 @@ plot(month, sie_month_ccsm_hist, 'b-','LineWidth',2);
 hold on
 plot(month,Bootstrap_mean/10^6,'k--','LineWidth',2)
 hold on
-plot(month,AA_SIE_MEAN,'k-','LineWidth',2)
+plot(month,NASA_MEAN,'k-','LineWidth',2)
 hold on
 plot(month,HadISST/10^12,'k-.','LineWidth',2)
 hold on
@@ -137,28 +137,26 @@ trend_mam_allmodels_19792005 = cat(1,trend_mam_ccsm_7905_001(1)*10,trend_mam_ccs
     trend_mam_waccm_7905_001(1)*10,trend_mam_waccm_7905_002(1)*10,trend_mam_waccm_7905_003(1)*10,trend_mam_waccm_7905_007(1)*10,trend_mam_gfdlg_7905(1)*10,...
     trend_mam_gfdlm_7905(1)*10);
 
-mean_obs_trend = trend_mam_obs(1);
+%mean of HadISST/NASA/Bootstrap
+mean_obs_trend = (HadISST + NASA_MEAN + Boostrap_mean)/3;
 
 xmax2 = max(trend_mam_allmodels_19792005)
 xmin2 = min(trend_mam_allmodels_19792005)
 
 j = 1;
 for i = 0:0.001:xmax2-xmin2,
-    x7(j) = xmin2 + i;
+    x3(j) = xmin2 + i;
     j = j + 1;
 end
 
-y3 = zeros(length(x7));
-y4 = 2.5*ones(length(x7));
+y4 = zeros(length(x3));
+y5 = 2.5*ones(length(x3));
 
-mean_model_trend = mean(p2_mam_allmodels_19792005);
-
-for i = 1:length(fr_ann), year(i) = i;end
-lengthyear = length(year);
+mean_model_trend = mean(trend_mam_allmodels_19792005);
 
 %plot PDF along with historical and satellite observation trends
 figure(3)
-h= jbfill(x7,y3,y4,[0.7 0.7 0.7],[0.7 0.7 0.7],1,0.3);
+h= jbfill(x3,y4,y5,[0.7 0.7 0.7],[0.7 0.7 0.7],1,0.3);
 not_in_legend(h)
 hold on
 plot(x1,f1,'b-','LineWidth',2);
